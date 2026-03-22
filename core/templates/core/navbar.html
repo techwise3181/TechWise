@@ -1,0 +1,199 @@
+<nav class="sticky top-0 z-50 bg-[#0f172a] text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 gap-x-2 px-2">
+            <a href="{% url 'home' %}" class="flex items-center gap-2 cursor-pointer mr-4 shrink-0">
+                <i data-lucide="laptop" class="text-[#2563eb]" size="32"></i>
+                <span class="text-2xl font-bold tracking-tight">TechWise</span>
+            </a>
+
+            <!-- Desktop Menu -->
+            <div class="hidden lg:flex items-center gap-x-1 ml-auto">
+                <a href="{% url 'home' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <i data-lucide="laptop" size="20"></i>
+                    <span>Home</span>
+                </a>
+                <a href="{% url 'buy' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'buy' %}active{% endif %}">
+                    <i data-lucide="shopping-cart" size="20"></i>
+                    <div class="flex flex-col leading-tight text-[11px] font-bold">
+                        <span>Buy</span>
+                        <span>Laptops</span>
+                    </div>
+                </a>
+                <a href="{% url 'rent' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'rent' %}active{% endif %}">
+                    <i data-lucide="calendar" size="20"></i>
+                    <div class="flex flex-col leading-tight text-[11px] font-bold">
+                        <span>Rent</span>
+                        <span>Laptops</span>
+                    </div>
+                </a>
+                <a href="{% url 'service_request' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'service_request' %}active{% endif %}">
+                    <i data-lucide="wrench" size="20"></i>
+                    <div class="flex flex-col leading-tight text-[11px] font-bold">
+                        <span>Service</span>
+                        <span>Request</span>
+                    </div>
+                </a>
+                <a href="{% url 'about' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+                    <i data-lucide="info" size="20"></i>
+                    <span>About</span>
+                </a>
+                <a href="{% url 'contact' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
+                    <i data-lucide="mail" size="20"></i>
+                    <span>Contact</span>
+                </a>
+                <a href="{% url 'admin_dashboard' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                    <i data-lucide="user" size="20"></i>
+                    <span>Admin</span>
+                </a>
+                
+                <div id="cart-nav" class="hidden">
+                    <a href="{% url 'cart' %}" class="nav-link {% if request.resolver_match.url_name == 'cart' %}active{% endif %} relative">
+                        <i data-lucide="shopping-cart" size="20"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1 rounded-full min-w-4 h-4 flex items-center justify-center border border-slate-900">
+                            {{ cart_count }}
+                        </span>
+                        <span>Cart</span>
+                    </a>
+                </div>
+
+                <div class="h-6 w-px bg-gray-700 mx-4"></div>
+
+                <div id="auth-links" class="flex items-center gap-3">
+                    <a href="{% url 'login' %}" id="login-link"
+                        class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                        <i data-lucide="user" size="20"></i>
+                        <span>Login</span>
+                    </a>
+                    <a href="{% url 'register' %}" id="register-link"
+                        class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}">
+                        <i data-lucide="user-plus" size="20"></i>
+                        <span>Register</span>
+                    </a>
+                    <a href="{% url 'dashboard' %}" id="dashboard-link"
+                        class="nav-link hidden {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <i data-lucide="layout-dashboard" size="20"></i>
+                        <span>My Dashboard</span>
+                    </a>
+                    <button id="logout-btn" class="nav-link hidden">
+                        <i data-lucide="log-out" size="20"></i>
+                        <span>Logout</span>
+                    </button>
+                    <span id="user-display" class="hidden text-sm font-semibold text-[#2563eb] ml-2"></span>
+                </div>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="lg:hidden">
+                <button id="menu-btn" class="p-2 rounded-md hover:bg-gray-800">
+                    <i data-lucide="menu" size="24" id="menu-icon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden lg:hidden bg-[#0f172a] border-t border-gray-800">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+            <a href="{% url 'home' %}" class="nav-link">Home</a>
+            <a href="{% url 'buy' %}" class="nav-link">Buy Laptops</a>
+            <a href="{% url 'rent' %}" class="nav-link">Rent Laptops</a>
+            <a href="{% url 'service_request' %}" class="nav-link">Service Request</a>
+            <a href="{% url 'about' %}" class="nav-link">About</a>
+            <a href="{% url 'contact' %}" class="nav-link">Contact</a>
+            <a href="{% url 'admin_dashboard' %}" class="nav-link">Admin</a>
+            <div id="mobile-auth-links">
+                <a href="{% url 'dashboard' %}" id="mobile-dashboard-link" class="nav-link hidden">My Dashboard</a>
+                <a href="{% url 'login' %}" id="mobile-login-link" class="nav-link">Login</a>
+                <a href="{% url 'register' %}" id="mobile-register-link" class="nav-link">Register</a>
+                <button id="mobile-logout-btn" class="nav-link hidden w-full text-left">Logout</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function updateAuthUI() {
+        const userStr = localStorage.getItem('techwise_user');
+        let user = null;
+        try {
+            user = userStr ? JSON.parse(userStr) : null;
+        } catch (e) {
+            console.error("Error parsing user session:", e);
+        }
+
+        const isLoggedIn = !!(user && user.isLoggedIn);
+
+        const loginLinks = [document.getElementById('login-link'), document.getElementById('mobile-login-link')];
+        const registerLinks = [document.getElementById('register-link'), document.getElementById('mobile-register-link')];
+        const logoutBtns = [document.getElementById('logout-btn'), document.getElementById('mobile-logout-btn')];
+        const dashboardLinks = [document.getElementById('dashboard-link'), document.getElementById('mobile-dashboard-link')];
+        const userDisplay = document.getElementById('user-display');
+        const cartNav = document.getElementById('cart-nav');
+
+        if (isLoggedIn) {
+            loginLinks.forEach(el => { if (el) el.style.setProperty('display', 'none', 'important'); });
+            registerLinks.forEach(el => { if (el) el.style.setProperty('display', 'none', 'important'); });
+            logoutBtns.forEach(el => { if (el) el.style.setProperty('display', 'flex', 'important'); });
+            
+            if (cartNav) cartNav.style.setProperty('display', 'block', 'important');
+            
+            // Hide dashboard if admin
+            const isAdmin = user.isSuperuser || user.isAdmin;
+            dashboardLinks.forEach(el => { 
+                if (el) {
+                    el.style.setProperty('display', isAdmin ? 'none' : 'flex', 'important');
+                }
+            });
+            
+            if (userDisplay) {
+                userDisplay.textContent = user.name || user.email;
+                userDisplay.style.setProperty('display', 'inline', 'important');
+            }
+        } else {
+            loginLinks.forEach(el => { if (el) el.style.setProperty('display', 'flex', 'important'); });
+            registerLinks.forEach(el => { if (el) el.style.setProperty('display', 'flex', 'important'); });
+            logoutBtns.forEach(el => { if (el) el.style.setProperty('display', 'none', 'important'); });
+            dashboardLinks.forEach(el => { if (el) el.style.setProperty('display', 'none', 'important'); });
+            if (cartNav) cartNav.style.setProperty('display', 'none', 'important');
+            if (userDisplay) {
+                userDisplay.textContent = '';
+                userDisplay.style.setProperty('display', 'none', 'important');
+            }
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('techwise_user');
+        window.location.href = "{% url 'logout' %}";
+    }
+
+    const logoutBtn = document.getElementById('logout-btn');
+    const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+
+    if (logoutBtn) logoutBtn.onclick = handleLogout;
+    if (mobileLogoutBtn) mobileLogoutBtn.onclick = handleLogout;
+
+    // Run on every page load
+    updateAuthUI();
+    window.onload = updateAuthUI;
+    document.addEventListener('DOMContentLoaded', updateAuthUI);
+
+    document.getElementById('menu-btn').addEventListener('click', function () {
+        const menu = document.getElementById('mobile-menu');
+        const icon = document.getElementById('menu-icon');
+        menu.classList.toggle('hidden');
+        if (menu.classList.contains('hidden')) {
+            icon.setAttribute('data-lucide', 'menu');
+        } else {
+            icon.setAttribute('data-lucide', 'x');
+        }
+        lucide.createIcons();
+    });
+</script>

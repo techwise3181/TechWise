@@ -1,0 +1,15 @@
+Django==6.0.3
+gunicorn==23.0.0
+whitenoise==6.9.0
+django-environ==0.12.0
+pillow==12.1.1
+xhtml2pdf==0.2.17
+asgiref==3.11.1
+sqlparse==0.5.5
+tzdata==2025.3
+requests==2.32.5
+python-dateutil==2.9.0
+six==1.17.0
+reportlab==4.4.10
+svglib==1.6.0
+pytailwindcss==0.3.0

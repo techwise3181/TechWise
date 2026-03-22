@@ -1,0 +1,232 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Dashboard - TechWise{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="flex justify-between items-end mb-8">
+        <div>
+            <h1 class="text-4xl font-bold">My Dashboard</h1>
+            <p class="text-gray-600">Manage your orders, rentals, and service requests.</p>
+        </div>
+        <div class="bg-[#2563eb] text-white px-6 py-2 rounded-full font-bold">
+            Account: {{ user.username }}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Sales & Rentals Column -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Laptop Purchases -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        <i data-lucide="shopping-bag" class="text-[#2563eb]"></i>
+                        Laptop Purchases
+                    </h2>
+                </div>
+                <div class="p-0">
+                    {% if sales %}
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                            <tr>
+                                <th class="px-6 py-3">Laptop</th>
+                                <th class="px-6 py-3 text-right">Total</th>
+                                <th class="px-6 py-3">Date</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for sale in sales %}
+                            {% if sale.status != 'Cancelled' and sale.status != 'Delivered' %}
+                            <tr class="hover:bg-blue-50 transition-colors">
+                                <td class="px-6 py-4 font-semibold">{{ sale.laptop_name }}</td>
+                                <td class="px-6 py-4 text-right font-bold">₹{{ sale.total_amount }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">{{ sale.sale_date|date:"M d, Y" }}</td>
+                                <td class="px-6 py-4 text-sm font-bold text-orange-500">{{ sale.status }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex gap-3">
+                                        <a href="{% url 'track_order' 'sale' sale.id %}" class="text-green-600 hover:underline flex items-center gap-1">
+                                            <i data-lucide="map" size="16"></i> Track
+                                        </a>
+                                        <a href="{% url 'invoice' 'sale' sale.id %}" target="_blank" class="text-[#2563eb] hover:underline flex items-center gap-1">
+                                            <i data-lucide="file-text" size="16"></i> View
+                                        </a>
+                                        {% if sale.status == 'Order Placed' or sale.status == 'Order Confirmed' %}
+                                        <form action="{% url 'cancel_order' 'sale' sale.id %}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?')">
+                                            {% csrf_token %}
+                                            <button type="submit" class="text-red-500 hover:underline flex items-center gap-1">
+                                                <i data-lucide="trash-2" size="16"></i> Cancel
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="p-12 text-center text-gray-500">
+                        <i data-lucide="package" size="48" class="mx-auto mb-4 opacity-20"></i>
+                        <p>No purchases yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Laptop Rentals -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        <i data-lucide="calendar" class="text-[#2563eb]"></i>
+                        My Rentals
+                    </h2>
+                </div>
+                <div class="p-0">
+                    {% if rentals %}
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                            <tr>
+                                <th class="px-6 py-3">Laptop</th>
+                                <th class="px-6 py-3">Duration</th>
+                                <th class="px-6 py-3 text-right">Total</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for rental in rentals %}
+                            {% if rental.status != 'Cancelled' and rental.status != 'Delivered' %}
+                            <tr class="hover:bg-blue-50 transition-colors">
+                                <td class="px-6 py-4 font-semibold">{{ rental.laptop_name }}</td>
+                                <td class="px-6 py-4 text-sm">{{ rental.duration }}</td>
+                                <td class="px-6 py-4 text-right font-bold">₹{{ rental.total_amount }}</td>
+                                <td class="px-6 py-4 text-sm font-bold text-orange-500">{{ rental.status }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex gap-3">
+                                        <a href="{% url 'track_order' 'rental' rental.id %}" class="text-green-600 hover:underline flex items-center gap-1">
+                                            <i data-lucide="map" size="16"></i> Track
+                                        </a>
+                                        <a href="{% url 'invoice' 'rental' rental.id %}" target="_blank" class="text-[#2563eb] hover:underline flex items-center gap-1">
+                                            <i data-lucide="file-text" size="16"></i> View
+                                        </a>
+                                        {% if rental.status == 'Order Placed' or rental.status == 'Order Confirmed' %}
+                                        <form action="{% url 'cancel_order' 'rental' rental.id %}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this rental?')">
+                                            {% csrf_token %}
+                                            <button type="submit" class="text-red-500 hover:underline flex items-center gap-1">
+                                                <i data-lucide="trash-2" size="16"></i> Cancel
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="p-12 text-center text-gray-500">
+                        <i data-lucide="clock" size="48" class="mx-auto mb-4 opacity-20"></i>
+                        <p>No active rentals.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Requests Column -->
+        <div class="space-y-8">
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 h-full">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        <i data-lucide="wrench" class="text-[#2563eb]"></i>
+                        Service Requests
+                    </h2>
+                </div>
+                <div class="p-6">
+                    {% if services %}
+                    <div class="space-y-4">
+                        {% for service in services %}
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50 hover:border-[#2563eb] transition-all">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-1 bg-blue-100 text-[#2563eb] text-[10px] font-bold rounded uppercase">
+                                    {{ service.problem_type }}
+                                </span>
+                                <span class="text-[10px] text-gray-400">{{ service.created_at|date:"M d" }}</span>
+                            </div>
+                            <h3 class="font-bold text-sm">{{ service.laptop_model }}</h3>
+                            <p class="text-xs text-gray-600 line-clamp-2 mt-1">{{ service.problem_description }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12 text-gray-500">
+                        <p>No service requests.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order History Section -->
+    <div class="mt-12">
+        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+            <i data-lucide="history" class="text-gray-400"></i>
+            Order History
+        </h2>
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+            <div class="p-0">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                        <tr>
+                            <th class="px-6 py-3">Type</th>
+                            <th class="px-6 py-3">Laptop</th>
+                            <th class="px-6 py-3 text-right">Total</th>
+                            <th class="px-6 py-3">Status</th>
+                            <th class="px-6 py-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for sale in sales %}
+                        {% if sale.status == 'Cancelled' or sale.status == 'Delivered' %}
+                        <tr class="hover:bg-gray-50 transition-colors opacity-75">
+                            <td class="px-6 py-4 text-xs font-bold uppercase text-blue-500 font-mono">Purchase</td>
+                            <td class="px-6 py-4 font-semibold">{{ sale.laptop_name }}</td>
+                            <td class="px-6 py-4 text-right font-bold">₹{{ sale.total_amount }}</td>
+                            <td class="px-6 py-4 text-sm font-bold {% if sale.status == 'Cancelled' %}text-red-500{% else %}text-green-600{% endif %}">{{ sale.status }}</td>
+                            <td class="px-6 py-4 text-sm">
+                                <a href="{% url 'invoice' 'sale' sale.id %}" target="_blank" class="text-[#2563eb] hover:underline flex items-center gap-1">
+                                    <i data-lucide="file-text" size="16"></i> Invoice
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                        
+                        {% for rental in rentals %}
+                        {% if rental.status == 'Cancelled' or rental.status == 'Delivered' %}
+                        <tr class="hover:bg-gray-50 transition-colors opacity-75">
+                            <td class="px-6 py-4 text-xs font-bold uppercase text-purple-500 font-mono">Rental</td>
+                            <td class="px-6 py-4 font-semibold">{{ rental.laptop_name }}</td>
+                            <td class="px-6 py-4 text-right font-bold">₹{{ rental.total_amount }}</td>
+                            <td class="px-6 py-4 text-sm font-bold {% if rental.status == 'Cancelled' %}text-red-500{% else %}text-green-600{% endif %}">{{ rental.status }}</td>
+                            <td class="px-6 py-4 text-sm">
+                                <a href="{% url 'invoice' 'rental' rental.id %}" target="_blank" class="text-[#2563eb] hover:underline flex items-center gap-1">
+                                    <i data-lucide="file-text" size="16"></i> Invoice
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

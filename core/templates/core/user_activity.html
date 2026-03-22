@@ -1,0 +1,148 @@
+{% extends 'core/base.html' %}
+
+{% block title %}User Activity - {{ target_user.username }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'admin_dashboard' %}" class="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400">
+                <i data-lucide="arrow-left" size="24"></i>
+            </a>
+            <div>
+                <h1 class="text-4xl font-bold text-slate-900">User Activity</h1>
+                <p class="text-slate-500 font-medium">Diagnostic report for <span class="text-purple-600">@{{ target_user.username }}</span></p>
+            </div>
+        </div>
+        <div class="flex gap-4">
+            <div class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3">
+                <i data-lucide="mail" class="text-slate-300" size="20"></i>
+                <span class="text-slate-600 font-bold">{{ target_user.email }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Purchase History</p>
+            <p class="text-3xl font-900 text-blue-600">{{ sales|length }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Active Rentals</p>
+            <p class="text-3xl font-900 text-indigo-600">{{ rentals|length }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Support Tickets</p>
+            <p class="text-3xl font-900 text-orange-500">{{ services|length }}</p>
+        </div>
+    </div>
+
+    <div class="space-y-12">
+        <!-- Sales -->
+        <section>
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <i data-lucide="shopping-cart" class="text-blue-600" size="20"></i>
+                Purchase Records
+            </h2>
+            <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Hardware Item</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Quantity</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Transaction Date</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Total Paid</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        {% for sale in sales %}
+                        <tr>
+                            <td class="px-6 py-4">
+                                <p class="font-bold text-slate-900">{{ sale.laptop_name }}</p>
+                                <p class="text-[10px] text-slate-400">{{ sale.address }}, {{ sale.district }}, {{ sale.state }} - {{ sale.pincode }}</p>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-500">{{ sale.quantity }}</td>
+                            <td class="px-6 py-4 text-sm text-slate-500">{{ sale.sale_date|date:"F d, Y" }}</td>
+                            <td class="px-6 py-4 text-right font-900 text-blue-600">₹{{ sale.total_amount }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 italic">No purchase history found</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Rentals -->
+        <section>
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <i data-lucide="clock" class="text-indigo-600" size="20"></i>
+                Lease History
+            </h2>
+            <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Leased Hardware</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Quantity</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Duration</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Settlement</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        {% for rental in rentals %}
+                        <tr>
+                            <td class="px-6 py-4">
+                                <p class="font-bold text-slate-900">{{ rental.laptop_name }}</p>
+                                <p class="text-[10px] text-slate-400">{{ rental.address }}, {{ rental.district }}, {{ rental.state }} - {{ rental.pincode }}</p>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-500">{{ rental.quantity }}</td>
+                            <td class="px-6 py-4 text-sm text-slate-500">{{ rental.duration }}</td>
+                            <td class="px-6 py-4 text-right font-900 text-indigo-600">₹{{ rental.total_amount }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 italic">No rental history found</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Services -->
+        <section>
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <i data-lucide="wrench" class="text-orange-500" size="20"></i>
+                Technical Incidents
+            </h2>
+            <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Affected Model</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Problem Classification</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Log Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        {% for req in services %}
+                        <tr>
+                            <td class="px-6 py-4">
+                                <p class="font-bold text-slate-900">{{ req.laptop_model }}</p>
+                                <p class="text-[10px] text-slate-400">{{ req.address }}, {{ req.district }}, {{ req.state }} - {{ req.pincode }}</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-[10px] font-bold px-2 py-0.5 bg-orange-100 text-orange-700 rounded uppercase">{{ req.problem_type }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-xs text-slate-500 line-clamp-1">{{ req.problem_description }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" class="px-6 py-12 text-center text-slate-400 italic">No support tickets recorded</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 30pt;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            color: #1e293b;
+            background-color: #ffffff;
+        }
+        .text-white { color: #ffffff; }
+        .text-blue { color: #3b82f6; }
+        .text-slate { color: #64748b; }
+        .text-slate-light { color: #94a3b8; }
+        .bg-navy { background-color: #0f172a; }
+        .bg-blue { background-color: #2563eb; }
+        .bg-slate-light { background-color: #f8fafc; }
+        .font-bold { font-weight: bold; }
+        .uppercase { text-transform: uppercase; }
+        
+        .manifest-table {
+            width: 100%;
+            border-top: 1pt solid #e2e8f0;
+        }
+        .manifest-th {
+            background-color: #f8fafc;
+            color: #94a3b8;
+            font-size: 8pt;
+            font-weight: bold;
+            padding: 10pt;
+        }
+        .manifest-td {
+            padding: 15pt 10pt;
+            border-bottom: 1pt solid #f1f5f9;
+        }
+        .total-box {
+            background-color: #2563eb;
+            color: #ffffff;
+            padding: 15pt;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER SECTION -->
+    <table width="100%" cellpadding="30" cellspacing="0" border="0" bgcolor="#0f172a" style="border-bottom: 4pt solid #2563eb;">
+        <tr>
+            <td>
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td width="65%" style="vertical-align: top;">
+                            <table width="240" cellpadding="10" cellspacing="0" border="0" bgcolor="#1e293b">
+                                <tr>
+                                    <td style="border: 1pt solid #334155;">
+                                        <div style="font-size: 20pt; font-weight: bold; color: #ffffff;">TECHWISE</div>
+                                        <div style="font-size: 8pt; color: #3b82f6; text-transform: uppercase; font-weight: bold; margin-top: 2pt;">Next-Gen Laptop Solutions</div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br><br>
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td width="50%">
+                                        <div style="font-size: 7pt; color: #94a3b8; text-transform: uppercase;">Headquarters</div>
+                                        <div style="font-size: 8pt; font-weight: bold; color: #ffffff; margin-top: 2pt;">Vadakara, Kerala, India</div>
+                                        <div style="font-size: 7pt; color: #3b82f6;">+91 98765 43210</div>
+                                    </td>
+                                    <td width="50%" style="border-left: 1pt solid #334155; padding-left: 15pt;">
+                                        <div style="font-size: 7pt; color: #94a3b8; text-transform: uppercase;">Digital Support</div>
+                                        <div style="font-size: 8pt; font-weight: bold; color: #ffffff; margin-top: 2pt;">techwise3181@gmail.com</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td width="35%" style="text-align: right; vertical-align: top;">
+                            <div style="background-color: {% if type == 'sale' %}#1e3a8a{% else %}#7c3aed{% endif %}; display: inline-block; padding: 4pt 12pt; border: 1pt solid {% if type == 'sale' %}#3b82f6{% else %}#a78bfa{% endif %};">
+                                <span style="font-size: 9pt; color: #ffffff; font-weight: bold; text-transform: uppercase;">
+                                    {% if type == 'sale' %}PURCHASE INVOICE{% else %}RENTAL INVOICE{% endif %}
+                                </span>
+                            </div>
+                            <br><br><br>
+                            <div style="font-size: 8pt; color: #94a3b8; text-transform: uppercase;">Invoice Registry</div>
+                            <div style="font-size: 18pt; font-weight: bold; color: #ffffff; margin-top: 2pt;">TW-{{ order.invoice_date|date:"Y" }}-{{ order.id|stringformat:"05d" }}</div>
+                            <div style="font-size: 8pt; color: #94a3b8; margin-top: 2pt;">ISSUED: {{ order.invoice_date|date:"F d, Y" }}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <br><br>
+
+    <!-- INFORMATION GRID -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td width="48%" style="vertical-align: top;">
+                <div style="font-size: 8pt; color: #94a3b8; text-transform: uppercase; border-bottom: 2pt solid #f1f5f9; padding-bottom: 4pt; margin-bottom: 10pt;">Recipient Profile</div>
+                <div style="font-size: 16pt; font-weight: bold; color: #0f172a;">{{ order.customer_name }}</div>
+                <div style="font-size: 9pt; color: #64748b; margin-top: 2pt;">{{ order.email }}</div>
+                <div style="font-size: 9pt; color: #64748b;">{{ order.mobile_number|default:"No Phone Provided" }}</div>
+                <br>
+                <div style="font-size: 7pt; color: #94a3b8; text-transform: uppercase;">Service Address</div>
+                <div style="font-size: 9pt; font-weight: bold; color: #475569; line-height: 1.3;">
+                    {{ order.address|default:"N/A" }}<br>
+                    {{ order.district|default:"" }}, {{ order.state|default:"" }} - {{ order.pincode|default:"" }}
+                </div>
+            </td>
+            <td width="4%"></td>
+            <td width="48%" style="vertical-align: top;">
+                <div style="font-size: 8pt; color: #94a3b8; text-transform: uppercase; border-bottom: 2pt solid #f1f5f9; padding-bottom: 4pt; margin-bottom: 10pt;">Payment Logistics</div>
+                <table width="100%" cellpadding="12" cellspacing="0" border="0" bgcolor="#f8fafc" style="border: 1pt solid #e2e8f0;">
+                    <tr>
+                        <td width="55%">
+                            <div style="font-size: 7pt; color: #94a3b8; text-transform: uppercase;">Payment Way</div>
+                            <div style="font-size: 10pt; font-weight: bold; color: #0f172a;">Cash on Delivery</div>
+                        </td>
+                        <td width="45%">
+                            <div style="font-size: 7pt; color: #94a3b8; text-transform: uppercase;">Order Status</div>
+                            <div style="font-size: 10pt; font-weight: bold; color: #2563eb;">{{ order.status|upper }}</div>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <table width="100%" cellpadding="12" cellspacing="0" border="0" bgcolor="#f8fafc" style="border: 1pt dashed #cbd5e1;">
+                    <tr>
+                        <td align="center">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=https://techwise.com/verify/{{ order.id }}" width="60" height="60">
+                            <div style="font-size: 6pt; color: #94a3b8; text-transform: uppercase; margin-top: 4pt; font-weight: bold;">Secure Registry Code</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <br><br>
+
+    <!-- MANIFEST TABLE -->
+    <div style="font-size: 8pt; color: #94a3b8; text-transform: uppercase; border-bottom: 2pt solid #f1f5f9; padding-bottom: 4pt; margin-bottom: 8pt;">Service Manifest</div>
+    <table class="manifest-table" cellpadding="0" cellspacing="0" border="0">
+        <tr bgcolor="#f8fafc">
+            <td width="65%" class="manifest-th">ITEM DESCRIPTION</td>
+            <td width="10%" class="manifest-th" align="center">QTY</td>
+            <td width="25%" class="manifest-th" align="right">VALUATION</td>
+        </tr>
+        <tr>
+            <td class="manifest-td" style="vertical-align: top;">
+                <div style="font-size: 12pt; font-weight: bold; color: #0f172a;">{{ order.laptop_name }}</div>
+                <div style="font-size: 8pt; color: #64748b; margin-top: 2pt;">
+                    {% if order.specs_list %}
+                        {{ order.laptop_specs }}
+                    {% else %}
+                        Professional Standard Build
+                    {% endif %}
+                </div>
+                <div style="font-size: 7pt; color: #10b981; font-weight: bold; text-transform: uppercase; margin-top: 8pt;">
+                    {% if type == 'sale' %} PURCHASE ACCOUNT • 12M WARRANTY {% else %} RENTAL SUBSCRIPTION • {{ order.duration }} {% endif %}
+                </div>
+            </td>
+            <td class="manifest-td" align="center" style="vertical-align: middle; font-size: 11pt; font-weight: bold;">{{ order.quantity }}</td>
+            <td class="manifest-td" align="right" style="vertical-align: middle; font-size: 11pt; font-weight: bold;">₹{% if type == 'sale' %}{{ order.price }}{% else %}{{ order.rental_price }}{% endif %}</td>
+        </tr>
+    </table>
+
+    <br><br>
+
+    <!-- SUMMARY SECTION -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td width="55%" style="vertical-align: top;">
+                <table width="100%" cellpadding="15" cellspacing="0" border="0" bgcolor="#f0f7ff" style="border: 1pt solid #dbeafe;">
+                    <tr>
+                        <td>
+                            <div style="font-size: 8pt; color: #1e3a8a; font-weight: bold; text-transform: uppercase; margin-bottom: 5pt;">Terms & Acknowledgement</div>
+                            <div style="font-size: 7pt; color: #3b82f6;">• 12 Month Technical Warranty applied from deployment.</div>
+                            <div style="font-size: 7pt; color: #3b82f6;">• 30 Day Priority Hardware Satisfaction Guarantee.</div>
+                            <div style="font-size: 7pt; color: #3b82f6;">• Official Support: techwise_support@gmail.com</div>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td>
+                            <div style="font-size: 7pt; color: #94a3b8; text-transform: uppercase;">Authorized Seal</div>
+                            <div style="font-size: 8pt; font-weight: bold; color: #0f172a; margin-top: 2pt;">TechWise Digital Audit Audit Team</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td width="5%"></td>
+            <td width="40%" style="vertical-align: top;">
+                <table width="100%" cellpadding="5" cellspacing="0" border="0">
+                    <tr>
+                        <td style="font-size: 8pt; color: #64748b;">Subtotal (Excluded)</td>
+                        <td align="right" style="font-size: 9pt; font-weight: bold;">₹{{ order.total_amount }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-size: 8pt; color: #64748b;">IGST (12% Applied)</td>
+                        <td align="right" style="font-size: 9pt; font-weight: bold;">₹{{ order.tax_amount|default:"0.00" }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" bgcolor="#2563eb" style="padding: 15pt; color: #ffffff;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td><div style="font-size: 7pt; text-transform: uppercase; font-weight: bold; opacity: 0.8;">Total Payables</div></td>
+                                    <td align="right"><div style="font-size: 16pt; font-weight: bold;">₹{{ order.total_amount }}</div></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <br><br><br>
+    <div style="text-align: center; border-top: 1pt solid #f1f5f9; padding-top: 10pt;">
+        <div style="font-size: 7pt; color: #94a3b8; text-transform: uppercase; letter-spacing: 2pt;">TechWise Precision Systems • Official Registry Document</div>
+    </div>
+</body>
+</html>

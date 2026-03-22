@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TechWise{% endblock %}</title>
+    <!-- Use Tailwind via CDN for easy integration without Node/Vite -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'core/css/styles.css' %}?v=1.7">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col bg-[#f4f6f9]">
+    {% include 'core/navbar.html' %}
+
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'core/footer.html' %}
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Auth Utility
+        function checkAuth(callback) {
+            const user = JSON.parse(localStorage.getItem('techwise_user'));
+            if (user && user.isLoggedIn) {
+                if (callback) callback();
+                return true;
+            } else {
+                alert('Please login first to continue.');
+                window.location.href = "{% url 'login' %}";
+                return false;
+            }
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

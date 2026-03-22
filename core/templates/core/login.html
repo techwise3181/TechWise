@@ -1,0 +1,85 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Login - TechWise{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto my-12 p-8 bg-white rounded-xl shadow-lg border border-gray-100">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Sign In</h1>
+        <p class="text-gray-500 mt-2">Access your customer account</p>
+    </div>
+
+    <form id="login-form" class="space-y-6">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Username or Email</label>
+            <input type="text" id="email" name="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter username or email">
+        </div>
+        <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+            <input type="password" id="password" name="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••">
+        </div>
+
+        <div id="error-message" class="hidden text-red-500 text-sm font-medium text-center bg-red-50 py-2 rounded-lg">
+            Invalid credentials.
+        </div>
+
+        <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all">
+            Login
+        </button>
+
+        <div class="text-center text-sm text-gray-600">
+            Don't have an account? <a href="{% url 'register' %}" class="text-blue-600 font-bold hover:underline">Register</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submit-btn');
+        const errorMsg = document.getElementById('error-message');
+        
+        btn.disabled = true;
+        btn.textContent = 'Verifying...';
+        errorMsg.classList.add('hidden');
+
+        const formData = {
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+        };
+
+        try {
+            const response = await fetch("{% url 'login' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // Save session for navbar
+                localStorage.setItem('techwise_user', JSON.stringify(result.user));
+                btn.textContent = 'Success! Redirecting...';
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const nextUrl = urlParams.get('next');
+                setTimeout(() => {
+                    window.location.href = nextUrl || "{% url 'home' %}";
+                }, 500);
+            } else {
+                throw new Error(result.message || 'Invalid credentials');
+            }
+        } catch (error) {
+            errorMsg.textContent = error.message;
+            errorMsg.classList.remove('hidden');
+            btn.disabled = false;
+            btn.textContent = 'Login';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends 'core/base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}Checkout - TechWise{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-5 border border-slate-100">
+        <!-- Order Summary Column -->
+        <div class="lg:col-span-2 bg-slate-900 text-white p-10">
+            <h2 class="text-3xl font-black mb-8 tracking-tight">Order Summary</h2>
+            
+            <div class="space-y-6 max-h-[500px] overflow-y-auto pr-4 custom-scrollbar">
+                {% for item in cart_items %}
+                <div class="flex gap-4 items-center pb-6 border-b border-slate-800">
+                    <div class="w-16 h-16 bg-slate-800 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src="{{ item.laptop.image_url }}" alt="{{ item.laptop.name }}" class="w-full h-full object-cover opacity-80">
+                    </div>
+                    <div class="flex-grow">
+                        <h4 class="font-bold text-sm leading-tight">{{ item.laptop.name }}</h4>
+                        <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">{{ item.laptop.brand }} • {{ item.transaction_type }} • Qty: {{ item.quantity }}</p>
+                        <p class="text-[10px] text-slate-500 mt-1 line-clamp-1">{{ item.laptop.specs }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-blue-400">₹{{ item.total_price }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-8 pt-8 border-t-2 border-slate-800 space-y-4">
+                <div class="flex justify-between text-slate-400">
+                    <span class="text-sm font-medium uppercase tracking-widest">Subtotal</span>
+                    <span class="font-bold text-white">₹{{ total }}</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                    <span class="text-sm font-medium uppercase tracking-widest">Tax (12% IGST)</span>
+                    <span class="font-bold text-white">₹{{ total|mul:0.12|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+                    <span class="text-lg font-black uppercase">Total Amount</span>
+                    <span class="text-3xl font-black text-blue-500">₹{{ total|mul:1.12|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50">
+                <p class="text-[10px] text-slate-400 italic leading-relaxed">
+                    * By confirming, you agree to our terms of service. Digital invoices will be sent to your registered email address and stored in your dashboard.
+                </p>
+            </div>
+        </div>
+
+        <!-- Checkout Form Column -->
+        <div class="lg:col-span-3 p-10 lg:p-12">
+            <div class="mb-10">
+                <h3 class="text-2xl font-black text-slate-900 mb-2">Delivery Details</h3>
+                <p class="text-slate-500 text-sm">Please provide accurate shipping and contact information.</p>
+            </div>
+
+            <form id="checkout-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+                        <input name="name" type="text" required value="{{ user.get_full_name|default:user.username }}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium" placeholder="John Doe">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                        <input name="email" type="email" required value="{{ user.email }}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium" placeholder="john@example.com">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Shipping Address</label>
+                    <textarea name="address" required rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium resize-none" placeholder="House No, Street, Landmark..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Mobile Number</label>
+                        <input name="mobile" type="tel" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium" placeholder="+91 98765 43210">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Pincode</label>
+                        <input name="pincode" type="text" pattern="[0-9]{6}" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium" placeholder="400001">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">State</label>
+                        <select id="state-select" name="state" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium appearance-none cursor-pointer">
+                            <option value="" disabled selected>Select State</option>
+                        </select>
+                    </div>
+                    <div id="district-container" class="space-y-1 opacity-50 pointer-events-none transition-all">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">District</label>
+                        <select id="district-select" name="district" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium appearance-none cursor-pointer">
+                            <option value="" disabled selected>Select District</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex gap-4">
+                    <a href="{% url 'cart' %}" class="flex-1 text-center py-4 rounded-2xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition-all active:scale-95">
+                        Back to Cart
+                    </a>
+                    <button type="submit" id="submit-btn" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-blue-200 active:scale-95 transition-all">
+                        Place Order
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const indianStatesData = {
+        "Andhra Pradesh": ["Anantapur", "Chittoor", "East Godavari", "Guntur", "Krishna", "Kurnool", "Nellore", "Prakasam", "Srikakulam", "Visakhapatnam", "Vizianagaram", "West Godavari", "YSR Kadapa"],
+        "Arunachal Pradesh": ["Tawang", "West Kameng", "East Kameng", "Papum Pare", "Kurung Kumey", "Kra Daadi", "Lower Subansiri", "Upper Subansiri", "West Siang", "East Siang", "Siang", "Upper Siang", "Lower Siang", "Lower Dibang Valley", "Dibang Valley", "Anjaw", "Lohit", "Namsai", "Changlang", "Tirap", "Longding"],
+        "Assam": ["Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang", "Dhemaji", "Dhubri", "Dibrugarh", "Goalpara", "Golaghat", "Hailakandi", "Hojai", "Jorhat", "Kamrup Metropolitan", "Kamrup", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur", "Majuli", "Morigaon", "Nagaon", "Nalbari", "Dima Hasao", "Sivasagar", "Sonitpur", "South Salmara-Mankachar", "Tinsukia", "Udalguri", "West Karbi Long"],
+        "Bihar": ["Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur", "Bhojpur", "Buxar", "Darbhanga", "East Champaran (Motihari)", "Gaya", "Gopalganj", "Jamui", "Jehanabad", "Kaimur (Bhabua)", "Katihar", "Khagaria", "Kishanjganj", "Lakhisarai", "Madhepura", "Madhubani", "Munger (Monghyr)", "Muzaffarpur", "Nalanda", "Nawada", "Patna", "Purnia (Purnea)", "Rohtas", "Saharsa", "Samastipur", "Saran", "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali", "West Champaran"],
+        "Goa": ["North Goa", "South Goa"],
+        "Gujarat": ["Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udepur", "Dahod", "Dang", "Devbhoomi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kutch", "Kheda", "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal", "Patan", "Porbandar", "Rajkot", "Sabarkantha", "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"],
+        "Haryana": ["Ambala", "Bhiwani", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"],
+        "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davangere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura", "Yadgir"],
+        "Kerala": ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"],
+        "Maharashtra": ["Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed", "Bhandara", "Buldhana", "Chandrapur", "Dhule", "Gadchiroli", "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mumbai City", "Mumbai Suburban", "Nagpur", "Nanded", "Nandurbar", "Nashik", "Osmanabad", "Palghar", "Parbhani", "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara", "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim", "Yavatmal"],
+        "Punjab": ["Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Ferozepur", "Gurdaspur", "Hoshiarpur", "Jalandhar", "Kapurthala", "Ludhiana", "Mansa", "Moga", "Muktsar", "Pathankot", "Patiala", "Rupnagar", "SAS Nagar", "Sangrur", "Tarn Taran"],
+        "Rajasthan": ["Ajmer", "Alwar", "Banswara", "Baran", "Barmer", "Bharatpur", "Bhilwara", "Bikaner", "Bundi", "Chittorgarh", "Churu", "Dausa", "Dholpur", "Dungarpur", "Hanumangarh", "Jaipur", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu", "Jodhpur", "Karauli", "Kota", "Nagaur", "Pali", "Pratapgarh", "Rajsamand", "Sawai Madhopur", "Sikar", "Sirohi", "Sri Ganganagar", "Tonk", "Udaipur"],
+        "Tamil Nadu": ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kallakurichi", "Kanchipuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupathur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"],
+        "Telangana": ["Adilabad", "Bhadradri-Kothagudem", "Hyderabad", "Jagtial", "Jangaon", "Jayashankar-Bhupalpally", "Jogulamba-Gadwal", "Kamareddy", "Karimnagar", "Khammam", "Kumuram-Bheem", "Mahabubabad", "Mahabubnagar", "Mancherial", "Medak", "Medchal–Malkajgiri", "Mulugu", "Nagarkurnool", "Nalgonda", "Narayanpet", "Nirmal", "Nizamabad", "Peddapalli", "Rajanna-Sircilla", "Rangareddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad", "Wanaparthy", "Warangal Rural", "Warangal Urban", "Yadadri-Bhuvanagiri"],
+        "Uttar Pradesh": ["Agra", "Aligarh", "Allahabad", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Azamgarh", "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly", "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr", "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah", "Faizabad", "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddha Nagar", "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur", "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj", "Kaushambi", "Kheri", "Kushinagar", "Lalitpur", "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Pilibhit", "Pratapgarh", "RaeBareli", "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur", "Shamli", "Shravasti", "Siddharth Nagar", "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"],
+        "West Bengal": ["Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur", "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram", "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas", "Paschim Bardhaman", "Paschim Medinipur", "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"]
+    };
+
+    const stateSelect = document.getElementById('state-select');
+    const districtContainer = document.getElementById('district-container');
+    const districtSelect = document.getElementById('district-select');
+
+    // Populate States
+    Object.keys(indianStatesData).sort().forEach(state => {
+        const option = document.createElement('option');
+        option.value = state;
+        option.textContent = state;
+        stateSelect.appendChild(option);
+    });
+
+    stateSelect.addEventListener('change', function() {
+        const selectedState = this.value;
+        districtSelect.innerHTML = '<option value="" disabled selected>Select District</option>';
+        if (indianStatesData[selectedState]) {
+            districtContainer.classList.remove('hidden');
+            districtContainer.classList.remove('opacity-50');
+            districtContainer.classList.remove('pointer-events-none');
+            indianStatesData[selectedState].sort().forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                districtSelect.appendChild(option);
+            });
+        }
+    });
+
+    document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submit-btn');
+        const formData = new FormData(this);
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+
+        const orderData = {
+            customerName: formData.get('name'),
+            email: formData.get('email'),
+            address: formData.get('address'),
+            pincode: formData.get('pincode'),
+            state: formData.get('state'),
+            district: formData.get('district'),
+            mobile: formData.get('mobile'),
+            // Types and items are handled by backend session/cart
+        };
+
+        try {
+            const response = await fetch("{% url 'checkout' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(orderData)
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to process order');
+            }
+
+            // Success redirect (backend should return success status)
+            window.location.href = result.redirect || '/dashboard/';
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Checkout Error: " + error.message);
+            btn.disabled = false;
+            btn.textContent = 'Place Order';
+        }
+    });
+</script>
+{% endblock %}

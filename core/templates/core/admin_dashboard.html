@@ -1,0 +1,788 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Admin Dashboard - TechWise{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12">
+    {% if not user.is_superuser %}
+    <div id="admin-login-section" class="max-w-md mx-auto">
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 text-center">
+            <div class="flex justify-center mb-6">
+                <div class="bg-blue-100 p-4 rounded-full text-[#2563eb]">
+                    <i data-lucide="shield-check" size="32"></i>
+                </div>
+            </div>
+            <h1 class="text-3xl font-bold mb-2">Admin Access</h1>
+            <p class="text-gray-500 mb-8">Please verify your administrative identity</p>
+            
+            <form id="admin-login-form" class="space-y-6 text-left">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input name="username" type="text" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#2563eb] outline-none" placeholder="admin">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input name="password" type="password" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#2563eb] outline-none" placeholder="••••••••">
+                </div>
+                <p id="admin-error" class="hidden text-red-500 text-sm font-medium text-center"></p>
+                <button type="submit" class="w-full bg-[#2563eb] hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-lg transition-colors">Confirm Account</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div id="admin-dashboard-section">
+        {% csrf_token %}
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-4xl font-bold">Admin Dashboard</h1>
+                <p class="text-gray-600">Manage all laptop purchase and rental orders.</p>
+            </div>
+            <div class="flex gap-3">
+                <button class="clear-btn bg-red-50 text-red-600 px-4 py-2 rounded-lg font-medium hover:bg-red-100 transition-colors">Clear All Orders</button>
+                <button class="logout-btn bg-gray-100 text-gray-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors">Logout</button>
+            </div>
+        </div>
+
+        <div class="space-y-12">
+            <!-- Product Management Section -->
+            <section>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i data-lucide="laptop" class="text-[#2563eb]" size="24"></i>
+                        Inventory Management
+                    </h2>
+                    <div class="flex gap-2">
+                        <span class="px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-100">
+                            {{ laptops|length }} Models Registered
+                        </span>
+                        <span class="px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-100">
+                            Live Stock Active
+                        </span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Add/Edit Form -->
+                    <div class="lg:col-span-1 bg-white p-6 rounded-3xl shadow-xl border border-slate-100">
+                        <h3 id="form-title" class="text-xl font-800 mb-6 text-slate-900 border-b pb-4">New Laptop Unit</h3>
+                        <form id="product-form" class="space-y-4">
+                            {% csrf_token %}
+                            <input type="hidden" id="editing-id">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Model Name</label>
+                                    <input id="name" name="name" type="text" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-300" placeholder="e.g. MacBook Pro 14">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Brand</label>
+                                    <input id="brand" name="brand" type="text" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-300" placeholder="e.g. Apple">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Hardware Specs</label>
+                                    <textarea id="specs" name="specs" rows="2" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-300" placeholder="Intel i9, 32GB RAM..."></textarea>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Buy Price</label>
+                                        <input id="price" name="price" type="number" step="0.01" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="1999.00">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Rent / Day</label>
+                                        <input id="rentPrice" name="rentPrice" type="number" step="0.01" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="30.00">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Total Units</label>
+                                        <input id="stock" name="stock" type="number" min="0" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="10">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Image URL</label>
+                                    <input id="image" name="image" type="url" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-300" placeholder="https://...">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Market Listing</label>
+                                    <select id="availability" name="availability" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                                        <option value="Sale">Sale Only</option>
+                                        <option value="Rent">Rent Only</option>
+                                        <option value="Both">Both Sale & Rent</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 pt-6">
+                                <button type="submit" id="form-submit" class="flex-grow bg-blue-600 text-white font-bold py-3 rounded-2xl shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-[0.98] transition-all">Publish Unit</button>
+                                <button type="button" id="cancel-edit" class="hidden px-6 py-3 border border-slate-200 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 transition-all">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Product List Table -->
+                    <div class="lg:col-span-2 bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50 border-b border-slate-100">
+                                    <tr>
+                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Hardware</th>
+                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pricing</th>
+                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                                        <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-50">
+                                    {% for laptop in laptops %}
+                                    <tr class="hover:bg-slate-50/50 transition-colors group">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-4">
+                                                <img src="{{ laptop.image_url }}" class="w-12 h-12 object-cover rounded-xl shadow-sm">
+                                                <div>
+                                                    <p class="font-800 text-slate-900">{{ laptop.name }}</p>
+                                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{{ laptop.brand }}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="space-y-1">
+                                                <p class="text-xs font-bold text-slate-700">Buy: <span class="text-blue-600">₹{{ laptop.price }}</span></p>
+                                                <p class="text-xs font-bold text-slate-700">Rent: <span class="text-indigo-600">₹{{ laptop.rent_price }}/d</span></p>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-full border border-slate-200 uppercase tracking-widest block w-fit mb-2">
+                                                {{ laptop.availability_type }}
+                                            </span>
+                                            <span class="px-3 py-1 {% if laptop.stock > 0 %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %} text-[10px] font-bold rounded-full border border-slate-200 uppercase tracking-widest inline-flex items-center gap-1">
+                                                <i data-lucide="package" size="12"></i> 
+                                                {% if laptop.stock > 0 %}{{ laptop.stock }} in stock{% else %}Out of Stock{% endif %}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button 
+                                                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors edit-btn" 
+                                                    title="Edit Unit"
+                                                    data-id="{{ laptop.id }}"
+                                                    data-name="{{ laptop.name|escapejs }}"
+                                                    data-brand="{{ laptop.brand|escapejs }}"
+                                                    data-specs="{{ laptop.specs|escapejs }}"
+                                                    data-price="{{ laptop.price }}"
+                                                    data-rent_price="{{ laptop.rent_price }}"
+                                                    data-image_url="{{ laptop.image_url|escapejs }}"
+                                                    data-availability_type="{{ laptop.availability_type }}"
+                                                    data-stock="{{ laptop.stock }}"
+                                                >
+                                                    <i data-lucide="edit-3" size="18"></i>
+                                                </button>
+                                                <button 
+                                                    class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors delete-btn" 
+                                                    title="Remove Unit"
+                                                    data-type="laptop"
+                                                    data-id="{{ laptop.id }}"
+                                                >
+                                                    <i data-lucide="trash-2" size="18"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 italic font-semibold">No hardware registered in database</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i data-lucide="shopping-cart" class="text-[#2563eb]" size="24"></i>
+                        Active Purchase Orders
+                    </h2>
+                    <span class="px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-100">
+                        {{ sales|length }} Sales Total
+                    </span>
+                </div>
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client Identity</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Order Specification</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Administrative</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                {% for sale in sales %}
+                                <tr class="hover:bg-slate-50/50 transition-colors group">
+                                    <td class="px-6 py-6">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                                                {{ sale.customer_name|slice:":1" }}
+                                            </div>
+                                            <div>
+                                                <p class="font-800 text-slate-900">{{ sale.customer_name }}</p>
+                                                <p class="text-[10px] text-slate-400 font-bold uppercase">{{ sale.email }}</p>
+                                                <p class="text-[10px] text-slate-400 font-medium italic">{{ sale.address }}, {{ sale.district }}, {{ sale.state }} - {{ sale.pincode }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-6">
+                                        <div class="space-y-1">
+                                            <p class="font-bold text-slate-900">{{ sale.laptop_name }}</p>
+                                            <div class="flex items-center gap-3 text-xs">
+                                                <span class="font-800 text-blue-600">₹{{ sale.total_amount }}</span>
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-slate-400">Qty: {{ sale.quantity }}</span>
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-slate-400">{{ sale.sale_date|date:"M d, Y" }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-6 text-right">
+                                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button 
+                                                class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors track-btn" 
+                                                title="Update Tracking"
+                                                data-type="sale"
+                                                data-id="{{ sale.id }}"
+                                                data-status="{{ sale.status }}"
+                                                data-lat="{{ sale.current_lat|default:'' }}"
+                                                data-lng="{{ sale.current_lng|default:'' }}"
+                                                data-eta="{% if sale.estimated_delivery %}{{ sale.estimated_delivery|date:'Y-m-d' }}{% endif %}"
+                                            >
+                                                <i data-lucide="map-pin" size="20"></i>
+                                            </button>
+                                            <button 
+                                                class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all delete-btn"
+                                                data-type="sale"
+                                                data-id="{{ sale.id }}"
+                                            >
+                                                <i data-lucide="trash-2" size="20"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="px-6 py-12 text-center text-slate-400 font-semibold italic">No sales transactions available</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Rentals Section -->
+            <section>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i data-lucide="clock" class="text-indigo-600" size="24"></i>
+                        Active Fleet Rentals
+                    </h2>
+                    <span class="px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold border border-indigo-100">
+                        {{ rentals|length }} Active Rentals
+                    </span>
+                </div>
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-indigo-50/30 border-b border-indigo-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Renter</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Lease Details</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-indigo-400 uppercase tracking-widest text-right">Administrative</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                {% for rental in rentals %}
+                                <tr class="hover:bg-slate-50/50 transition-colors group">
+                                    <td class="px-6 py-6">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">
+                                                {{ rental.customer_name|slice:":1" }}
+                                            </div>
+                                            <div>
+                                                <p class="font-800 text-slate-900">{{ rental.customer_name }}</p>
+                                                <p class="text-[10px] text-slate-400 font-bold uppercase">{{ rental.email }}</p>
+                                                <p class="text-[10px] text-slate-400 font-medium italic">{{ rental.address }}, {{ rental.district }}, {{ rental.state }} - {{ rental.pincode }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-6">
+                                        <div class="space-y-1">
+                                            <p class="font-bold text-slate-900">{{ rental.laptop_name }}</p>
+                                            <div class="flex items-center gap-3 text-xs">
+                                                <span class="font-800 text-indigo-600">{{ rental.duration }} Days</span>
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-slate-400">Qty: {{ rental.quantity }}</span>
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-slate-400">{{ rental.rental_date|date:"M d, Y" }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-6 text-right">
+                                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button 
+                                                class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors track-btn" 
+                                                title="Update Tracking"
+                                                data-type="rental"
+                                                data-id="{{ rental.id }}"
+                                                data-status="{{ rental.status }}"
+                                                data-lat="{{ rental.current_lat|default:'' }}"
+                                                data-lng="{{ rental.current_lng|default:'' }}"
+                                                data-eta="{% if rental.estimated_delivery %}{{ rental.estimated_delivery|date:'Y-m-d' }}{% endif %}"
+                                            >
+                                                <i data-lucide="map-pin" size="20"></i>
+                                            </button>
+                                            <button 
+                                                class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all delete-btn"
+                                                data-type="rental"
+                                                data-id="{{ rental.id }}"
+                                            >
+                                                <i data-lucide="trash-2" size="20"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="px-6 py-12 text-center text-slate-400 font-semibold italic">No rental active at the moment</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Service Requests Section -->
+            <section>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i data-lucide="wrench" class="text-orange-500" size="24"></i>
+                        Support Tickets
+                    </h2>
+                    <span class="px-4 py-1.5 bg-orange-50 text-orange-700 rounded-full text-xs font-bold border border-orange-100">
+                        {{ services|length }} Open Tickets
+                    </span>
+                </div>
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-orange-50/30 border-b border-orange-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-orange-400 uppercase tracking-widest">Customer</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-orange-400 uppercase tracking-widest">Incident</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-orange-400 uppercase tracking-widest">Status/Log</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-orange-400 uppercase tracking-widest text-right">Administrative</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                {% for req in services %}
+                                <tr class="hover:bg-slate-50/50 transition-colors group">
+                                    <td class="px-6 py-6 align-top">
+                                        <p class="font-800 text-slate-900">{{ req.customer_name }}</p>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{{ req.mobile_number }}</p>
+                                        <p class="text-[10px] text-blue-500 font-bold tracking-tight lowercase">{{ req.email }}</p>
+                                        <p class="text-[10px] text-slate-400 font-medium italic mt-1">{{ req.address }}, {{ req.district }}, {{ req.state }} - {{ req.pincode }}</p>
+                                    </td>
+                                    <td class="px-6 py-6 align-top">
+                                        <p class="font-bold text-slate-900">{{ req.laptop_model }}</p>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 bg-orange-100 text-orange-700 rounded uppercase tracking-wider">{{ req.problem_type }}</span>
+                                    </td>
+                                    <td class="px-6 py-6 align-top">
+                                        <p class="text-xs text-slate-600 line-clamp-2 mb-2">{{ req.problem_description }}</p>
+                                        <div class="flex gap-1">
+                                            {% for photo in req.photos %}
+                                            <img 
+                                                src="{{ photo }}" 
+                                                class="w-8 h-8 object-cover rounded shadow-sm border border-slate-100 cursor-pointer view-photo" 
+                                                data-url="{{ photo }}"
+                                            >
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-6 text-right">
+                                        <button 
+                                            class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100 delete-btn"
+                                            data-type="service"
+                                            data-id="{{ req.id }}"
+                                        >
+                                            <i data-lucide="trash-2" size="20"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-semibold italic">Everything is smooth, no tickets found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <!-- User Management Section -->
+            <section>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i data-lucide="users" class="text-purple-600" size="24"></i>
+                        Client Base Management
+                    </h2>
+                    <span class="px-4 py-1.5 bg-purple-50 text-purple-700 rounded-full text-xs font-bold border border-purple-100">
+                        {{ users|length }} Registered Users
+                    </span>
+                </div>
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-purple-50/30 border-b border-purple-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest">User Identity</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest">Account Status</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest">User Activity</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest text-right">Administrative</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                {% for u in users %}
+                                <tr class="hover:bg-slate-50/50 transition-colors group">
+                                    <td class="px-6 py-6">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">
+                                                {{ u.username|slice:":1"|upper }}
+                                            </div>
+                                            <div>
+                                                <p class="font-800 text-slate-900">{{ u.username }}</p>
+                                                {% if not u.is_superuser %}
+                                                <p class="text-xs text-slate-400">{{ u.email }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-6">
+                                        <div class="space-y-1">
+                                            <p class="text-[10px] font-bold uppercase tracking-widest {% if u.is_superuser %}text-red-500{% else %}text-slate-400{% endif %}">
+                                                {% if u.is_superuser %}Administrator{% else %}Standard Account{% endif %}
+                                            </p>
+                                            <p class="text-xs text-slate-400">Joined {{ u.date_joined|date:"M d, Y" }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-6 font-bold text-slate-900">
+                                        {% if not u.is_superuser %}
+                                        <a href="{% url 'user_activity' u.id %}" class="flex items-center gap-2 text-xs text-purple-600 hover:text-purple-800 bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-100 w-fit transition-all">
+                                            <i data-lucide="activity" size="14"></i>
+                                            View Diagnostics
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-6 text-right">
+                                        {% if not u.is_superuser %}
+                                        <button 
+                                            class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100 delete-btn"
+                                            data-type="user"
+                                            data-id="{{ u.id }}"
+                                        >
+                                            <i data-lucide="trash-2" size="20"></i>
+                                        </button>
+                                        {% else %}
+                                        <span class="text-[10px] font-bold text-slate-300 uppercase italic">Protected</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Tracking Update Modal -->
+<div id="tracking-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center backdrop-blur-sm">
+    <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl relative">
+        <button id="close-tracking-modal" class="absolute top-6 right-6 text-gray-400 hover:text-gray-900">
+            <i data-lucide="x" size="24"></i>
+        </button>
+        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+            <i data-lucide="map" class="text-indigo-600"></i> Update Tracking
+        </h2>
+        <form id="tracking-form" class="space-y-4">
+            <input type="hidden" id="track-id">
+            <input type="hidden" id="track-type">
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Delivery Status</label>
+                <select id="track-status" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                    <option value="Order Placed">Order Placed</option>
+                    <option value="Order Confirmed">Order Confirmed</option>
+                    <option value="Packed">Packed</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Latitude</label>
+                    <input id="track-lat" type="number" step="any" placeholder="11.2588" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Longitude</label>
+                    <input id="track-lng" type="number" step="any" placeholder="75.7804" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Estimated Delivery (ETA)</label>
+                <input id="track-eta" type="date" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+            </div>
+            
+            <p class="text-xs text-gray-400 mb-4">* ETA and Coordinates update instantly for the customer.</p>
+
+            <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-indigo-700 transition">Save Tracking Info</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('admin-login-form')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const username = formData.get('username');
+        const password = formData.get('password');
+
+        try {
+            const response = await fetch("{% url 'admin_login' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                // Sync with navbar
+                localStorage.setItem('techwise_user', JSON.stringify({
+                    name: 'Administrator',
+                    email: username,
+                    isLoggedIn: true,
+                    isSuperuser: true,
+                    isAdmin: true
+                }));
+                location.reload(); 
+            } else {
+                const error = document.getElementById('admin-error');
+                if (error) {
+                    error.textContent = result.message || 'Invalid credentials';
+                    error.classList.remove('hidden');
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please check your connection.');
+        }
+    });
+
+    function adminLogout() {
+        localStorage.removeItem('techwise_user');
+        window.location.href = "{% url 'logout' %}";
+    }
+
+    document.getElementById('product-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = {
+            id: document.getElementById('editing-id').value,
+            name: formData.get('name'),
+            brand: formData.get('brand'),
+            specs: formData.get('specs'),
+            price: formData.get('price'),
+            rent_price: formData.get('rentPrice'),
+            stock: formData.get('stock'),
+            image_url: formData.get('image'),
+            availability_type: formData.get('availability')
+        };
+
+        try {
+            const response = await fetch('/api/admin/laptop/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                location.reload();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            alert('Request failed');
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        // Sync UI with localStorage
+        const user = JSON.parse(localStorage.getItem('techwise_user') || '{}');
+        if (user.isLoggedIn) {
+            // Internal UI sync logic if any
+        }
+        
+        // Track Button
+        if (e.target.closest('.track-btn')) {
+            const btn = e.target.closest('.track-btn');
+            document.getElementById('track-id').value = btn.dataset.id;
+            document.getElementById('track-type').value = btn.dataset.type;
+            document.getElementById('track-status').value = btn.dataset.status;
+            document.getElementById('track-lat').value = btn.dataset.lat || '';
+            document.getElementById('track-lng').value = btn.dataset.lng || '';
+            document.getElementById('track-eta').value = btn.dataset.eta || '';
+            
+            document.getElementById('tracking-modal').classList.remove('hidden');
+        }
+
+        // Close Track Modal
+        if (e.target.closest('#close-tracking-modal')) {
+            document.getElementById('tracking-modal').classList.add('hidden');
+        }
+
+        // Edit Button
+        if (e.target.closest('.edit-btn')) {
+            const btn = e.target.closest('.edit-btn');
+            const laptop = {
+                id: btn.dataset.id,
+                name: btn.dataset.name,
+                brand: btn.dataset.brand,
+                specs: btn.dataset.specs,
+                price: btn.dataset.price,
+                rent_price: btn.dataset.rent_price,
+                stock: btn.dataset.stock,
+                image_url: btn.dataset.image_url,
+                availability_type: btn.dataset.availability_type
+            };
+            editProduct(laptop);
+        }
+
+        // Delete Button
+        if (e.target.closest('.delete-btn')) {
+            const btn = e.target.closest('.delete-btn');
+            deleteRecord(btn.dataset.type, btn.dataset.id);
+        }
+
+        // Logout
+        if (e.target.closest('.logout-btn')) {
+            adminLogout();
+        }
+
+        // Clear Orders
+        if (e.target.closest('.clear-btn')) {
+            clearOrders();
+        }
+
+        // View Photo
+        if (e.target.closest('.view-photo')) {
+            window.open(e.target.closest('.view-photo').dataset.url);
+        }
+    });
+
+    function editProduct(laptop) {
+        document.getElementById('editing-id').value = laptop.id;
+        document.getElementById('name').value = laptop.name;
+        document.getElementById('brand').value = laptop.brand;
+        document.getElementById('specs').value = laptop.specs;
+        document.getElementById('price').value = laptop.price;
+        document.getElementById('rentPrice').value = laptop.rent_price;
+        document.getElementById('stock').value = laptop.stock;
+        document.getElementById('image').value = laptop.image_url;
+        document.getElementById('availability').value = laptop.availability_type;
+        
+        document.getElementById('cancel-edit').classList.remove('hidden');
+        document.getElementById('form-title').textContent = 'Update Hardware Unit';
+        document.getElementById('form-submit').textContent = 'Confirm Changes';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('cancel-edit').addEventListener('click', function() {
+        document.getElementById('product-form').reset();
+        document.getElementById('editing-id').value = '';
+        this.classList.add('hidden');
+        document.getElementById('form-title').textContent = 'New Hardware Unit';
+        document.getElementById('form-submit').textContent = 'Publish Unit';
+    });
+
+    async function deleteRecord(type, id) {
+        if (!confirm(`Permanently delete this ${type} record?`)) return;
+        
+        try {
+            const response = await fetch(`/api/admin/delete/${type}/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+            
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const result = await response.json();
+                if (result.status === 'success') {
+                    location.reload();
+                } else {
+                    alert('Delete failed: ' + result.message);
+                }
+            } else {
+                const text = await response.text();
+                console.error('Non-JSON response:', text);
+                alert(`Server error (${response.status}). Please check console.`);
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('Error during deletion: ' + error.message);
+        }
+    }
+
+    function clearOrders() {
+        alert('Universal clear is disabled for protection. Please delete records individually.');
+    }
+
+    document.getElementById('tracking-form')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const data = {
+            id: document.getElementById('track-id').value,
+            type: document.getElementById('track-type').value,
+            status: document.getElementById('track-status').value,
+            lat: document.getElementById('track-lat').value,
+            lng: document.getElementById('track-lng').value,
+            estimated_delivery: document.getElementById('track-eta').value
+        };
+
+        try {
+            const response = await fetch('/api/admin/track/update/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                location.reload();
+            } else {
+                alert('Update failed: ' + result.message);
+            }
+        } catch (error) {
+            alert('Error updating tracking status.');
+        }
+    });
+
+    // removed undefined updateUI call
+</script>
+{% endblock %}

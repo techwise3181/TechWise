@@ -1,0 +1,123 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Verify Account - TechWise{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto my-12 p-8 bg-white rounded-2xl shadow-2xl border border-gray-100 transform transition-all">
+    <div class="text-center mb-10">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full mb-4">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        </div>
+        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Verify Your Account</h1>
+        <p class="text-gray-500 mt-3">We've sent a 6-digit verification code to your inbox.</p>
+    </div>
+
+    <!-- Enhanced Messages -->
+    {% if messages %}
+    <div class="mb-8 space-y-3">
+        {% for message in messages %}
+        <div class="flex items-center p-4 rounded-xl text-sm font-semibold animate-pulse-subtle {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-100{% elif message.tags == 'success' %}bg-green-50 text-green-700 border border-green-100{% else %}bg-blue-50 text-blue-700 border border-blue-100{% endif %}">
+            <span class="mr-2">
+                {% if message.tags == 'error' %}⚠️{% elif message.tags == 'success' %}✅{% else %}ℹ️{% endif %}
+            </span>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-10">
+        {% csrf_token %}
+        
+        <div class="relative">
+            <label class="block text-center text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-6">Enter Verification Code</label>
+            <div class="relative group">
+                {{ form.otp }}
+                <div class="absolute inset-0 rounded-lg pointer-events-none border-2 border-transparent group-focus-within:border-blue-500/20 transition-all"></div>
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <p class="text-[11px] text-gray-400 font-medium flex items-center">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Expires in 5 minutes
+                </p>
+                <div id="cooldown-container" class="text-[11px] font-bold text-blue-600">
+                    <a href="{% url 'resend_otp' %}" id="resend-btn" class="hover:underline">Resend Code</a>
+                    <span id="timer" class="hidden text-gray-400">Resend in <span id="seconds">60</span>s</span>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/30 transform active:scale-[0.98] transition-all">
+            Verify & Create Account
+        </button>
+
+    </form>
+
+    <div class="mt-10 text-center">
+        <a href="{% url 'register' %}" class="text-gray-400 font-semibold text-sm hover:text-gray-600 transition-colors inline-flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Changed your email? Register again
+        </a>
+    </div>
+</div>
+
+<script>
+    // Resend Cooldown Timer Logic
+    const cooldownTime = Number("{{ cooldown|default:60 }}");
+    const resendBtn = document.getElementById('resend-btn');
+    const timerDisplay = document.getElementById('timer');
+    const secondsSpan = document.getElementById('seconds');
+    
+    // Check if we already have a cooldown in localStorage or if we just arrived
+    let timeLeft = parseInt(sessionStorage.getItem('otp_cooldown')) || 0;
+    
+    function startTimer(duration) {
+        timeLeft = duration;
+        resendBtn.classList.add('hidden');
+        timerDisplay.classList.remove('hidden');
+        
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            secondsSpan.innerText = timeLeft;
+            sessionStorage.setItem('otp_cooldown', timeLeft);
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                resendBtn.classList.remove('hidden');
+                timerDisplay.classList.add('hidden');
+                sessionStorage.removeItem('otp_cooldown');
+            }
+        }, 1000);
+    }
+
+    // Start timer on page load if cooldown active
+    if (timeLeft > 0) {
+        startTimer(timeLeft);
+    }
+
+    // When clicking resend, the page reloads, so we should set a new cooldown in session
+    resendBtn.addEventListener('click', () => {
+        sessionStorage.setItem('otp_cooldown', cooldownTime);
+    });
+</script>
+
+<style>
+    @keyframes pulse-subtle {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.01); }
+    }
+    .animate-pulse-subtle {
+        animation: pulse-subtle 2s infinite;
+    }
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    /* Firefox */
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+</style>
+{% endblock %}

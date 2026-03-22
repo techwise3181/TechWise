@@ -1,0 +1,62 @@
+/* Main CSS file for TechWise */
+:root {
+  --color-nav-bg: #0f172a;
+  --color-page-bg: #f4f6f9;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1e40af;
+  --font-sans: Arial, sans-serif;
+}
+
+body {
+  background-color: var(--color-page-bg);
+  color: #111827; /* gray-900 */
+  font-family: var(--font-sans);
+}
+
+.product-card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.product-card:hover {
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  transform: translateY(-0.25rem);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: colors 0.3s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.nav-link {
+  color: #d1d5db; /* gray-300 */
+  transition: color 0.3s;
+  cursor: pointer;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: white;
+  background-color: var(--color-primary);
+  border-radius: 0.5rem;
+}

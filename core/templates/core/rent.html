@@ -1,0 +1,143 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Rent Laptops - TechWise{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-bold mb-4">Rent Laptops</h1>
+    <p class="text-gray-600 mb-12">Affordable daily rentals for your temporary needs.</p>
+    <div id="rent-laptops" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for laptop in laptops %}
+        <div class="product-card group hover:shadow-2xl transition-all duration-500 overflow-hidden bg-white border border-slate-100 rounded-3xl">
+            <div class="relative h-56 overflow-hidden">
+                <img src="{{ laptop.image_url }}" alt="{{ laptop.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-indigo-600 uppercase tracking-widest border border-indigo-50">
+                    Active Fleet
+                </div>
+            </div>
+            <div class="p-8">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-xl font-800 text-slate-900">{{ laptop.name }}</h3>
+                    <span class="text-[10px] font-bold text-slate-400 tracking-tighter">{{ laptop.brand }}</span>
+                </div>
+                <p class="text-slate-500 text-sm line-clamp-2 min-h-[2.5rem] mb-6">{{ laptop.specs }}</p>
+                <div class="mt-auto pt-6 border-t border-slate-50">
+                    <div class="flex justify-between items-end mb-6">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Rental Rate</span>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-3xl font-black text-indigo-600 leading-none">₹{{ laptop.rent_price }}</span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">/ Day</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Quantity</label>
+                            <div class="flex items-center bg-slate-50 rounded-lg p-1 border border-slate-100">
+                                <input type="number" value="1" min="1" max="{{ laptop.stock }}" class="w-12 bg-transparent text-center font-bold text-slate-700 outline-none" id="qty-{{ laptop.id }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if laptop.stock > 0 %}
+                    <div class="flex flex-col gap-3">
+                        <button 
+                            class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xl shadow-slate-200 add-to-cart-btn"
+                            data-id="{{ laptop.id }}"
+                            data-type="rental"
+                        >
+                            <i data-lucide="shopping-cart" class="inline-block w-4 h-4 mr-2"></i>
+                            Add to Cart
+                        </button>
+                        <button 
+                            class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-xl shadow-indigo-100 rent-now-btn"
+                            data-id="{{ laptop.id }}"
+                        >
+                            <i data-lucide="calendar" class="inline-block w-4 h-4 mr-2"></i>
+                            Rent Now
+                        </button>
+                    </div>
+                    {% else %}
+                    <button class="w-full bg-slate-100 text-slate-400 py-4 rounded-2xl font-black text-sm uppercase tracking-widest cursor-not-allowed" disabled>
+                        Out of Stock
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full py-20 text-center">
+            <i data-lucide="clock" size="48" class="mx-auto text-slate-200 mb-4"></i>
+            <p class="text-slate-400 font-semibold italic">Our rental fleet is being serviced. Check back soon!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('click', function(e) {
+        // ADD TO CART
+        if (e.target.closest('.add-to-cart-btn')) {
+            const btn = e.target.closest('.add-to-cart-btn');
+            const laptopId = btn.dataset.id;
+            const type = btn.dataset.type;
+            const qty = document.getElementById(`qty-${laptopId}`).value;
+
+            checkAuth(() => {
+                fetch(`/cart/add/${laptopId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ quantity: qty, type: type })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast(data.message);
+                        setTimeout(() => window.location.href = "{% url 'cart' %}", 500);
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+        }
+
+        // RENT NOW (Adds to cart then goes to checkout)
+        if (e.target.closest('.rent-now-btn')) {
+            const btn = e.target.closest('.rent-now-btn');
+            const laptopId = btn.dataset.id;
+            const qty = document.getElementById(`qty-${laptopId}`).value;
+
+            checkAuth(() => {
+                fetch(`/cart/add/${laptopId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ quantity: qty, type: 'rental' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        window.location.href = "{% url 'checkout' %}";
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+        }
+    });
+
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-3 rounded-xl shadow-2xl z-50 animate-bounce';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+</script>
+{% endblock %}
